@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<style>
+			html, body {padding: 0px;
+						margin: 0px;
+						user-select: none;
+						outline: none;
+						border: none;
+						border-collapse: collapse;
+						background-color: #111;
+						color: white;
+						border-left: 1px solid black;}
+			@font-face {font-family: Trench;
+						src: url(trench.otf);}
+			@font-face {font-family: Time Burner;
+						src: url(timeburnerbold.ttf);}
+			.view {width: 100%;
+				height: 100vh;}
+			.titlebar {-webkit-app-region: drag;
+						height: 40px;
+						background: linear-gradient(to bottom right, #1F1F1F, black);
+						cursor: default;}
+			.controls {text-align: center;}
+			.nanobar {background: #333;
+					height: 5px;}
+			.bar {background: #119;
+				border-radius: 0px 10px 10px 0px;
+				border-right: 10px solid #099FFF;
+				height: 5px;}
+			.playlists {width: 100%;
+						height: 100%;}
+			.playlist {height: 100%;}
+			.list {overflow: hidden;
+					overflow-y: auto;}
+			.sMItem {cursor: default;
+					color: #DDD;
+					padding-left: 5%;
+					padding-right: 5%;}
+			.sMItem:hover {background-color: black;}
+			.mItem {cursor: default;
+					padding-left: 1%;
+					border-top: gray 1px dotted;}
+			.mItem:hover {background-color:#222;}
+			.inline {display: inline-block;}
+			.ad {width: 100%;}
+			.windowButtons {border-radius: 2px;
+							border: 1px solid black;
+							padding: 4px;
+							padding-top: 6px;
+							padding-bottom: 6px;}
+			.windowButtons:hover {border: 1px solid white;}
+			img {padding-right: 20px;
+				padding-left: 20px;
+				padding-top: 10px;
+				padding-bottom: 10px;}
+		</style>
+	</head>
+	<body>
+		<table class = "view">
+			<tr>
+				<td style = "vertical-align: top;" width = "320px;">
+					<div id = "controls" class = "controls">
+						<div id = "player"></div><br />
+						<button class = "btn btn-danger"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span></button>
+						<button id = "play" class = "btn btn-danger" onClick = "playPause()"><span id = "playButton" class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+						<button class = "btn btn-danger" onClick = "nextPlay()"><span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+						<button id = "random" class = "btn btn-danger" onClick = "ranSwitch()"><span class="glyphicon glyphicon-random" aria-hidden="true"></span></button>
+						<button id = "repeat" class = "btn btn-danger" onClick = "repeater()"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></button>
+					</div>
+				</td>
+				<td rowspan = "2" style = "vertical-align: top; border-left: 5px solid black;">
+					<div id = "ad" class = "ad"></div>
+					<div id = "playlist" class = "playlist list">
+						<br />
+						<br />
+						<div style = "font-size: 24px; text-align: center; font-family: 'Time burner';">Thanks for choosing <br /><span style = "font-family: 'Trench'; font-size: 75px;">SmashIndex Media Player</span></div>
+						<div style = "padding: 15px;">
+							<h2><span class = "glyphicon glyphicon-list-alt"></span> Instructions:</h2>
+							<ol>
+								<li>To skip around in a video, use the Left and Right arrows on your keyboard.</li>
+								<li>To play or pause, hit spacebar.</li>
+							</ol>
+							<h2><span class = "glyphicon glyphicon-usd"></span> Why Ads?</h2>
+							<p>This is a lovely question deserving of a lovely answer. The answer is: I need to eat!</p>
+							<p>Scour the Internet for all the lovely projects which are open source. What's one thing they have in common?</p>
+							<p>They're either ad-supported or they're deprecated.</p>
+							<p>Even some of the base features of VLC have stopped working with Linux because no one is motivated to solve minor problems.</p>
+							<p>Our ads also support the community forum, built into this player. There, you can discuss musical topics and exchange playlists with other listeners.
+							Ads also support our video information extraction server, which fetches your titles, video times, and creators from Youtube.</p>
+							<p><a href = "https://en.wikipedia.org/wiki/Tragedy_of_the_commons">Tragedy of the Commons</a></p>
+							<h2><span class = "glyphicon glyphicon-expand"></span> Why is the viewer so small?</h2>
+							<p>SIMP's purpose is music consumption first and foremost. What would be the purpose of replacing Youtube with videos from Youtube?</p>
+							<p>Secondly, our ad unit wouldn't fit in a window with a bigger player. . . Not going to lie, that's a majority of it.</p>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td height = "100%">
+					<div id = "playlists" class = "playlists list"></div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</body>
+	<footer>
+		<script src="nanobar.min.js"></script>
+		<script>
+			localStorage.setItem("A Rat", '[["E_LwdYlPNCE", "Best Slavic War Tribal Pagan Music | 45 MIN MIX |"], ["nPFnHdJ0dl0", "Joan Osborne - One Of Us (Official Music Video)"], ["ytMqO-WQpQ4", "Lindsey Stirling - Something Wild ft. Andrew McMahon in the Wilderness"]]');
+			console.log(JSON.parse(localStorage.getItem("playlists")));
+			
+			const ver = "17.10";
+			
+			const nanobar = new Nanobar({target: document.getElementById("controls")});
+						
+			var repeat = false;
+			var ran = false;
+			var player;
+			var currentList = [];
+			var playingList = [];
+			var playingNo;
+			
+			var winMax = function(){
+				if (sizeMax){
+						win.maximize();
+						sizeMax = false;
+					}else{
+						win.unmaximize();
+						sizeMax = true;
+					}
+			}
+			document.title = "SIMP " + ver;
+			var classReplace = function (element, classToBeReplaced, classReplacing){
+				if (document.getElementById(element).classList.contains(classToBeReplaced)){
+					document.getElementById(element).classList.remove(classToBeReplaced);
+				}
+				document.getElementById(element).classList.add(classReplacing);
+			}
+			var randInt = function(min, max){
+				return parseInt(Math.random() * (max - min) + min);
+			}
+			var initPlaylists = function(){
+				var plists = document.getElementById("playlists");
+				plists.innerHTML = '<div class = "mItem">Youtube</div>';
+				if (localStorage.getItem("playlists") == null){
+					localStorage.setItem("playlists", "[]");
+				}
+				var list = JSON.parse(localStorage.getItem("playlists"))
+				for(var item in list){
+					plists.innerHTML = plists.innerHTML + '<div class = "sMItem">' + list[item] + '</div>';
+				}plists.innerHTML = plists.innerHTML + '<div class = "sMItem">Queue</div><div class = "mItem">Pandora</div>';
+			}
+			var initPlaylist = function(playlist){
+				var plist = document.getElementById("playlist");
+				plist.innerHTML = "";
+				if (localStorage.getItem(playlist) == null) {
+					localStorage.setItem(playlist, "[]");
+				}
+				currentList = JSON.parse(localStorage.getItem(playlist));
+				if(currentList.length != 0){
+					for(var song in currentList){
+						plist.innerHTML = plist.innerHTML + '<div no = "' + song + '" class = "mItem"><span>' + (parseInt(song) + 1) + '</span><img src = "https://img.youtube.com/vi/' + currentList[song][0] + '/default.jpg">' + currentList[song][1] + '</div>';
+					}
+				}else{plist.innerHTML = '<div style = "font-size: 50px; color: #333; text-align: center; margin: 100px;"><span class = "glyphicon glyphicon-plus-sign"></span><br />You do not have any videos. <br /> Please add some.</div>';}
+			}
+			var initVid = function(arr){
+				player.loadVideoById({'videoId': arr[0]});
+				document.title = arr[1] + " .:. SIMP " + ver;
+			};
+			$(document).click(function(event) {
+				if ($(event.target).hasClass("sMItem") || $(event.target).hasClass("mItem")){
+					$(event.target).parent().children().css("background-color", "");
+				}if ($(event.target).hasClass("sMItem")){
+					$(event.target).css("background-color", "#911");
+					initPlaylist($(event.target).text());
+				}if ($(event.target).hasClass("mItem")){
+					$(event.target).css("background-color", "#119");
+				}
+			});
+			$(document).dblclick(function(event){
+				if($(event.target).parent().attr("id") == "playlist" || $(event.target).parent().hasClass("mItem")){
+					playingList = currentList;
+					if ($(event.target).parent().attr("id") == "playlist"){
+						initVid(playingList[$(event.target).attr("no")]);
+						playingNo = $(event.target).attr("no");
+					}if ($(event.target).parent().hasClass("mItem")){
+						initVid(playingList[$(event.target).parent().attr("no")]);
+						playingNo = $(event.target).parent().attr("no");
+					}
+				}
+			});
+			var tag = document.createElement('script');
+
+			tag.src = "https://www.youtube.com/iframe_api";
+			var firstScriptTag = document.getElementsByTagName('script')[0];
+			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			
+			function onYouTubeIframeAPIReady() {
+			player = new YT.Player('player', {
+				width: "320",
+				height: "180",
+				playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0},
+				events: {
+					'onReady': onPlayerReady,
+					'onStateChange': onPlayerStateChange,
+					'onError': nextPlay,
+				}
+			});
+			}
+			function onPlayerReady(event) {
+				$(document).keydown(function(event){
+					console.log(event.key);
+					if (event.key == " "){
+						event.preventDefault();
+						playPause();
+					}if (event.key == "ArrowLeft"){
+						event.preventDefault();
+						player.seekTo(player.getCurrentTime() - 5);
+					}if (event.key == "ArrowRight"){
+						event.preventDefault();
+						player.seekTo(player.getCurrentTime() + 5);
+					}
+				});
+				setInterval(updater, 300);
+				initPlaylists();
+			}
+			function nextPlay() {
+				if (repeat == true){
+					initVid(playingList[playingNo]);
+				}if (ran == true){
+					initVid(playingList[randInt(0, playingList.length)]);
+				}
+			}
+			function changePlay(playerStatus) {
+				if (playerStatus == 0) {
+					nextPlay();
+				}
+				if (playerStatus == 1) {
+					classReplace("playButton", "glyphicon-play", "glyphicon-pause");
+					classReplace("play", "btn-danger", "btn-default");
+				}else if (playerStatus == 2) {
+					classReplace("playButton", "glyphicon-pause", "glyphicon-play");
+					classReplace("play", "btn-default", "btn-danger");
+				}
+			}
+			function onPlayerStateChange(event) {
+				changePlay(event.data);
+			}
+			function playPause() {
+				if (player.getPlayerState() == 1){
+					player.pauseVideo();
+				}if (player.getPlayerState() == 2){
+					player.playVideo();
+				}
+			}
+			var repeater = function(){
+				if (repeat == true){
+					classReplace("repeat", "btn-default", "btn-danger");
+					repeat = false;}
+				else{
+					if (ran == true){
+						ranSwitch();
+					}
+					classReplace("repeat", "btn-danger", "btn-default");
+					repeat = true;}
+			}
+			var ranSwitch = function(){
+				if (ran == true){
+					classReplace("random", "btn-default", "btn-danger");
+					ran = false;}
+				else{
+					if (repeat == true) {
+						repeater();
+					}
+					classReplace("random", "btn-danger", "btn-default");
+					ran = true;}
+			}
+			var updater = function(){
+				if (player.getPlayerState() == 1 || player.getPlayerState() == 2){
+					var progress = player.getCurrentTime() / player.getDuration();
+					nanobar.go(progress * 100);
+				}
+			}
+		</script>
+	</footer>
+</html>
