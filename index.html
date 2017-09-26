@@ -112,7 +112,7 @@
 	<footer>
 		<script src="nanobar.min.js"></script>
 		<script>
-			localStorage.setItem("playlists", "['A Rat', 'B Rat']");
+			localStorage.setItem("playlists", '["A Rat", "B Rat"]');
 			localStorage.setItem("A Rat", '[["E_LwdYlPNCE", "Best Slavic War Tribal Pagan Music | 45 MIN MIX |"], ["nPFnHdJ0dl0", "Joan Osborne - One Of Us (Official Music Video)"], ["ytMqO-WQpQ4", "Lindsey Stirling - Something Wild ft. Andrew McMahon in the Wilderness"]]');
 			
 			const ver = "17.10";
@@ -151,7 +151,7 @@
 				if (localStorage.getItem("playlists") == null){
 					localStorage.setItem("playlists", "[]");
 				}
-				var list = JSON.parse(localStorage.getItem("playlists"))
+				var list = JSON.parse(localStorage.getItem("playlists"));
 				for(var item in list){
 					plists.innerHTML = plists.innerHTML + '<div class = "sMItem">' + list[item] + '</div>';
 				}plists.innerHTML = plists.innerHTML + '<div class = "sMItem">Queue</div><div class = "mItem">Pandora</div>';
