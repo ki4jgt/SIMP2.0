@@ -46,15 +46,9 @@
 			.mItem {cursor: default;
 					padding-left: 1%;
 					border-top: gray 1px dotted;}
-			.mItem:hover {background-color:#222;}
 			.inline {display: inline-block;}
-			.ad {width: 100%;}
-			.windowButtons {border-radius: 2px;
-							border: 1px solid black;
-							padding: 4px;
-							padding-top: 6px;
-							padding-bottom: 6px;}
-			.windowButtons:hover {border: 1px solid white;}
+			.ad {width: 100%;
+				text-align: center;}
 			img {padding-right: 20px;
 				padding-left: 20px;
 				padding-top: 10px;
@@ -113,7 +107,7 @@
 		<script src="nanobar.min.js"></script>
 		<script>
 			localStorage.setItem("playlists", '["A Rat", "B Rat"]');
-			localStorage.setItem("A Rat", '[["E_LwdYlPNCE", "Best Slavic War Tribal Pagan Music | 45 MIN MIX |"], ["nPFnHdJ0dl0", "Joan Osborne - One Of Us (Official Music Video)"], ["ytMqO-WQpQ4", "Lindsey Stirling - Something Wild ft. Andrew McMahon in the Wilderness"]]');
+			localStorage.setItem("A Rat", '[["E_LwdYlPNCE", "Best Slavic War Tribal Pagan Music | 45 MIN MIX |"], ["nPFnHdJ0dl0", "Joan Osborne - One Of Us (Official Music Video)"], ["ytMqO-WQpQ4", "Lindsey Stirling - Something Wild ft. Andrew McMahon in the Wilderness"], ["6NXnxTNIWkc", "4 Non Blondes - Whats Up"]]');
 			
 			const ver = "17.10";
 			
@@ -126,15 +120,6 @@
 			var playingList = [];
 			var playingNo;
 			
-			var winMax = function(){
-				if (sizeMax){
-						win.maximize();
-						sizeMax = false;
-					}else{
-						win.unmaximize();
-						sizeMax = true;
-					}
-			}
 			document.title = "SIMP " + ver;
 			var classReplace = function (element, classToBeReplaced, classReplacing){
 				if (document.getElementById(element).classList.contains(classToBeReplaced)){
@@ -147,18 +132,18 @@
 			}
 			var initPlaylists = function(){
 				var plists = document.getElementById("playlists");
-				plists.innerHTML = '<div class = "mItem">Youtube</div>';
+				plists.innerHTML = '<div class = "mItem">Test</div>';
 				if (localStorage.getItem("playlists") == null){
 					localStorage.setItem("playlists", "[]");
 				}
 				var list = JSON.parse(localStorage.getItem("playlists"));
 				for(var item in list){
 					plists.innerHTML = plists.innerHTML + '<div class = "sMItem">' + list[item] + '</div>';
-				}plists.innerHTML = plists.innerHTML + '<div class = "sMItem">Queue</div><div class = "mItem">Pandora</div>';
+				}plists.innerHTML = plists.innerHTML + '<div class = "sMItem" style = "font-weight: bold;">Queue</div><div class = "mItem">Pandora</div>';
 			}
 			var initPlaylist = function(playlist){
 				var plist = document.getElementById("playlist");
-				plist.innerHTML = "";
+				plist.innerHTML = '<div class = "ad" style = "font-size: 30px; margin: 3px;"><span class = "glyphicon glyphicon-plus-sign"></span> | <span class = "glyphicon glyphicon-download-alt"></span> <span class = "glyphicon glyphicon-open"></span> | <span class = "glyphicon glyphicon-trash"></span></div>';
 				if (localStorage.getItem(playlist) == null) {
 					localStorage.setItem(playlist, "[]");
 				}
@@ -167,7 +152,7 @@
 					for(var song in currentList){
 						plist.innerHTML = plist.innerHTML + '<div no = "' + song + '" class = "mItem"><span>' + (parseInt(song) + 1) + '</span><img src = "https://img.youtube.com/vi/' + currentList[song][0] + '/default.jpg">' + currentList[song][1] + '</div>';
 					}
-				}else{plist.innerHTML = '<div style = "font-size: 50px; color: #333; text-align: center; margin: 100px;"><span class = "glyphicon glyphicon-plus-sign"></span><br />You do not have any videos. <br /> Please add some.</div>';}
+				}else{plist.innerHTML = plist.innerHTML + '<div style = "font-size: 50px; color: #333; text-align: center; margin: 100px;"><span class = "glyphicon glyphicon-plus-sign"></span><br />You do not have any videos. <br /> Please add some.</div>';}
 			}
 			var initVid = function(arr){
 				player.loadVideoById({'videoId': arr[0]});
@@ -188,10 +173,10 @@
 					playingList = currentList;
 					if ($(event.target).parent().attr("id") == "playlist"){
 						initVid(playingList[$(event.target).attr("no")]);
-						playingNo = $(event.target).attr("no");
+						playingNo = parseInt($(event.target).attr("no"));
 					}if ($(event.target).parent().hasClass("mItem")){
 						initVid(playingList[$(event.target).parent().attr("no")]);
-						playingNo = $(event.target).parent().attr("no");
+						playingNo = parseInt($(event.target).parent().attr("no"));
 					}
 				}
 			});
@@ -235,6 +220,16 @@
 					initVid(playingList[playingNo]);
 				}if (ran == true){
 					initVid(playingList[randInt(0, playingList.length)]);
+				}if ((playingNo + 1) >= playingList.length){
+					playingNo = 0;
+					nextPlay();
+				}else{
+					console.log(playingNo);
+					console.log(playingList);
+					playingNo += 1;
+					console.log(playingNo);
+					console.log(playingList);
+					initVid(playingList[playingNo]);
 				}
 			}
 			function changePlay(playerStatus) {
