@@ -200,7 +200,6 @@
 			}
 			function onPlayerReady(event) {
 				$(document).keydown(function(event){
-					console.log(event.key);
 					if (event.key == " "){
 						event.preventDefault();
 						playPause();
@@ -217,20 +216,14 @@
 			}
 			function nextPlay() {
 				if (repeat == true){
-					initVid(playingList[playingNo]);
-				}if (ran == true){
-					initVid(playingList[randInt(0, playingList.length)]);
-				}if ((playingNo + 1) >= playingList.length){
+					playingNo = playingNo;
+				}else if (ran == true){
+					playingNo = randInt(0, playingList.length -1);
+				}else if (playingNo + 1 == playingList.length){
 					playingNo = 0;
-					nextPlay();
-				}else{
-					console.log(playingNo);
-					console.log(playingList);
-					playingNo += 1;
-					console.log(playingNo);
-					console.log(playingList);
-					initVid(playingList[playingNo]);
 				}
+				initVid(playingList[playingNo]);
+				playingNo += 1;
 			}
 			function changePlay(playerStatus) {
 				if (playerStatus == 0) {
