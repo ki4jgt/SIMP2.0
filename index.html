@@ -105,10 +105,7 @@
 	</body>
 	<footer>
 		<script src="nanobar.min.js"></script>
-		<script>
-			localStorage.setItem("playlists", '["A Rat", "B Rat"]');
-			localStorage.setItem("A Rat", '[["E_LwdYlPNCE", "Best Slavic War Tribal Pagan Music | 45 MIN MIX |"], ["nPFnHdJ0dl0", "Joan Osborne - One Of Us (Official Music Video)"], ["ytMqO-WQpQ4", "Lindsey Stirling - Something Wild ft. Andrew McMahon in the Wilderness"], ["6NXnxTNIWkc", "4 Non Blondes - Whats Up"]]');
-			
+		<script>			
 			const ver = "17.10";
 			
 			const nanobar = new Nanobar({target: document.getElementById("controls")});
@@ -116,11 +113,12 @@
 			var repeat = false;
 			var ran = false;
 			var player;
-			var currentList = [];
-			var playingList = [];
+			var currentList;
+			var playingList;
 			var playingNo;
 			
 			document.title = "SIMP " + ver;
+			
 			var classReplace = function (element, classToBeReplaced, classReplacing){
 				if (document.getElementById(element).classList.contains(classToBeReplaced)){
 					document.getElementById(element).classList.remove(classToBeReplaced);
@@ -130,9 +128,15 @@
 			var randInt = function(min, max){
 				return parseInt(Math.random() * (max - min) + min);
 			}
+			function get(yourUrl){
+				var Httpreq = new XMLHttpRequest();
+				Httpreq.open("GET",yourUrl,false);
+				Httpreq.send(null);
+				return JSON.parse(Httpreq.responseText);          
+			}
 			var initPlaylists = function(){
 				var plists = document.getElementById("playlists");
-				plists.innerHTML = '<div class = "mItem">Test</div>';
+				plists.innerHTML = '<div class = "mItem">User Forums</div>';
 				if (localStorage.getItem("playlists") == null){
 					localStorage.setItem("playlists", "[]");
 				}
@@ -143,14 +147,16 @@
 			}
 			var initPlaylist = function(playlist){
 				var plist = document.getElementById("playlist");
-				plist.innerHTML = '<div class = "ad" style = "font-size: 30px; margin: 3px;"><span class = "glyphicon glyphicon-plus-sign"></span> | <span class = "glyphicon glyphicon-download-alt"></span> <span class = "glyphicon glyphicon-open"></span> | <span class = "glyphicon glyphicon-trash"></span></div>';
+				plist.innerHTML = '<div class = "ad" style = "font-size: 25px; margin: 3px;"><span class = "glyphicon glyphicon-plus-sign" onClick = "addVideo()"></span> | <span class = "glyphicon glyphicon-download-alt"></span> <span class = "glyphicon glyphicon-open"></span> | <span class = "glyphicon glyphicon-trash"></span></div>';
+				if (playlist == "Queue"){
+					plist.innerHTML = "";}
 				if (localStorage.getItem(playlist) == null) {
 					localStorage.setItem(playlist, "[]");
 				}
-				currentList = JSON.parse(localStorage.getItem(playlist));
-				if(currentList.length != 0){
-					for(var song in currentList){
-						plist.innerHTML = plist.innerHTML + '<div no = "' + song + '" class = "mItem"><span>' + (parseInt(song) + 1) + '</span><img src = "https://img.youtube.com/vi/' + currentList[song][0] + '/default.jpg">' + currentList[song][1] + '</div>';
+				currentList = playlist
+				if(JSON.parse(window.localStorage.getItem(currentList)).length != 0){
+					for(var song in JSON.parse(window.localStorage.getItem(currentList))){
+						plist.innerHTML = plist.innerHTML + '<div no = "' + song + '" class = "mItem"><span>' + (parseInt(song) + 1) + '</span><img src = "https://img.youtube.com/vi/' + JSON.parse(window.localStorage.getItem(currentList))[song][0] + '/default.jpg">' + JSON.parse(window.localStorage.getItem(currentList))[song][1] + '</div>';
 					}
 				}else{plist.innerHTML = plist.innerHTML + '<div style = "font-size: 50px; color: #333; text-align: center; margin: 100px;"><span class = "glyphicon glyphicon-plus-sign"></span><br />You do not have any videos. <br /> Please add some.</div>';}
 			}
@@ -158,6 +164,21 @@
 				player.loadVideoById({'videoId': arr[0]});
 				document.title = arr[1] + " .:. SIMP " + ver;
 			};
+			function youtubeParser(url){
+				var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+				var match = url.match(regExp);
+				return (match&&match[7].length==11)? match[7] : false;
+			}
+			function addVideo(){
+				var str = window.prompt();
+				if (str.indexOf(".com") !== -1){
+					str = youtubeParser(str);	
+				}
+				list = JSON.parse(window.localStorage.getItem(currentList));
+				list.push([str, get("https://noembed.com/embed?url=http%3A//www.youtube.com/watch%3Fv%3DbDOYN-6gdRE".replace("bDOYN-6gdRE", str)).title]);
+				window.localStorage.setItem(currentList, JSON.stringify(list));
+				initPlaylist(currentList);
+			}
 			$(document).click(function(event) {
 				if ($(event.target).hasClass("sMItem") || $(event.target).hasClass("mItem")){
 					$(event.target).parent().children().css("background-color", "");
@@ -172,10 +193,10 @@
 				if($(event.target).parent().attr("id") == "playlist" || $(event.target).parent().hasClass("mItem")){
 					playingList = currentList;
 					if ($(event.target).parent().attr("id") == "playlist"){
-						initVid(playingList[$(event.target).attr("no")]);
+						initVid(JSON.parse(window.localStorage.getItem(playingList))[$(event.target).attr("no")]);
 						playingNo = parseInt($(event.target).attr("no"));
 					}if ($(event.target).parent().hasClass("mItem")){
-						initVid(playingList[$(event.target).parent().attr("no")]);
+						initVid(JSON.parse(window.localStorage.getItem(playingList))[$(event.target).parent().attr("no")]);
 						playingNo = parseInt($(event.target).parent().attr("no"));
 					}
 				}
@@ -204,7 +225,7 @@
 						event.preventDefault();
 						playPause();
 					}if (event.key == "ArrowLeft"){
-						event.preventDefault();
+						event.preventDefault(); 
 						player.seekTo(player.getCurrentTime() - 5);
 					}if (event.key == "ArrowRight"){
 						event.preventDefault();
@@ -217,13 +238,14 @@
 			function nextPlay() {
 				if (repeat == true){
 					playingNo = playingNo;
-				}else if (ran == true){
+				}if (ran == true){
 					playingNo = randInt(0, playingList.length -1);
-				}else if (playingNo + 1 == playingList.length){
+				}if (ran == false && repeat == false){
+				playingNo += 1;
+				}if (playingNo == JSON.parse(window.localStorage.getItem(playingList)).length){
 					playingNo = 0;
 				}
-				initVid(playingList[playingNo]);
-				playingNo += 1;
+				initVid(JSON.parse(window.localStorage.getItem(playingList))[playingNo]);
 			}
 			function changePlay(playerStatus) {
 				if (playerStatus == 0) {
