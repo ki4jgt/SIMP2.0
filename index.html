@@ -239,7 +239,7 @@
 				if (repeat == true){
 					playingNo = playingNo;
 				}if (ran == true){
-					playingNo = randInt(0, playingList.length -1);
+					playingNo = randInt(0, JSON.parse(window.localStorage.getItem(playingList)).length -1);
 				}if (ran == false && repeat == false){
 				playingNo += 1;
 				}if (playingNo == JSON.parse(window.localStorage.getItem(playingList)).length){
