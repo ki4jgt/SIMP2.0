@@ -118,6 +118,7 @@
 			var playingNo;
 			
 			document.title = "SIMP " + ver;
+			window.localStorage.setItem("playlists", '["My First List"]');
 			
 			var classReplace = function (element, classToBeReplaced, classReplacing){
 				if (document.getElementById(element).classList.contains(classToBeReplaced)){
